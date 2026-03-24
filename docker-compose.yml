@@ -6,6 +6,7 @@ services:
       - "3000:3000"
     volumes:
       - spacetimedb_data:/var/lib/spacetimedb
+      - ./game/src-tauri/spacetimedb:/app/module
 
 volumes:
   spacetimedb_data:

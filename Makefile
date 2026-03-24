@@ -14,4 +14,4 @@ spacetime-start:
 	docker compose up -d
 
 spacetime-publish:
-	cd game/src-tauri/spacetimedb && spacetime publish saros-db
+	docker compose exec spacetimedb spacetime publish saros-db --project-path /app/module
