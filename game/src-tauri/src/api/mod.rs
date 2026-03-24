@@ -1,24 +1,50 @@
-use axum::{Router, Json, extract::Path};
-use axum::routing::{get, post, put};
+use axum::routing::{get, put};
+use axum::{
+    Json, Router,
+    extract::{Path, State},
+};
+use serde_json::{Value, json};
+use std::sync::{Arc, Mutex};
 use tower_http::cors::CorsLayer;
-use serde_json::{json, Value};
 
-pub fn router() -> Router {
-    Router::new()
-        .route("/api/health",       get(health))
-        .route("/api/schemas",      get(schemas))
-        .route("/api/blocks",       get(blocks).post(create_block))
-        .route("/api/items",        get(items).post(create_item))
-        .route("/api/recipes",      get(recipes).post(create_recipe))
-        .route("/api/npcs",         get(npcs).post(create_npc))
-        .route("/api/quests",       get(quests).post(create_quest))
-        .route("/api/rules",        get(rules))
-        .route("/api/rules/:id",    put(update_rule))
-        .route("/api/textures",     post(upload_texture))
-        .layer(CorsLayer::permissive())
+struct AppState {
+    blocks: Mutex<Vec<Value>>,
+    textures: Mutex<Vec<Value>>,
 }
 
-async fn health() -> Json<Value> { Json(json!({"status": "ok"})) }
+pub fn router() -> Router {
+    let state = Arc::new(AppState {
+        blocks: Mutex::new(vec![
+            json!({"id":1,"name":"Stone","texture_id":"","is_solid":true,"is_transparent":false,"hardness":1.5}),
+            json!({"id":2,"name":"Dirt","texture_id":"","is_solid":true,"is_transparent":false,"hardness":0.5}),
+            json!({"id":3,"name":"Grass","texture_id":"","is_solid":true,"is_transparent":false,"hardness":0.6}),
+            json!({"id":4,"name":"Water","texture_id":"","is_solid":false,"is_transparent":true,"hardness":0.0}),
+            json!({"id":5,"name":"Sand","texture_id":"","is_solid":true,"is_transparent":false,"hardness":0.5}),
+            json!({"id":6,"name":"Log","texture_id":"","is_solid":true,"is_transparent":false,"hardness":2.0}),
+            json!({"id":7,"name":"Leaf","texture_id":"","is_solid":false,"is_transparent":true,"hardness":0.2}),
+        ]),
+        textures: Mutex::new(vec![]),
+    });
+
+    Router::new()
+        .route("/api/health", get(health))
+        .route("/api/schemas", get(schemas))
+        .route("/api/blocks", get(get_blocks).post(create_block))
+        .route("/api/blocks/:id", put(update_block))
+        .route("/api/items", get(items).post(create_item))
+        .route("/api/recipes", get(recipes).post(create_recipe))
+        .route("/api/npcs", get(npcs).post(create_npc))
+        .route("/api/quests", get(quests).post(create_quest))
+        .route("/api/rules", get(rules))
+        .route("/api/rules/:id", put(update_rule))
+        .route("/api/textures", get(get_textures).post(upload_texture))
+        .layer(CorsLayer::permissive())
+        .with_state(state)
+}
+
+async fn health() -> Json<Value> {
+    Json(json!({"status": "ok"}))
+}
 
 async fn schemas() -> Json<Value> {
     Json(json!({
@@ -30,16 +56,9 @@ async fn schemas() -> Json<Value> {
     }))
 }
 
-async fn blocks() -> Json<Value> {
-    Json(json!([
-        {"id":1,"name":"Stone","texture_id":"","is_solid":true,"is_transparent":false,"hardness":1.5},
-        {"id":2,"name":"Dirt","texture_id":"","is_solid":true,"is_transparent":false,"hardness":0.5},
-        {"id":3,"name":"Grass","texture_id":"","is_solid":true,"is_transparent":false,"hardness":0.6},
-        {"id":4,"name":"Water","texture_id":"","is_solid":false,"is_transparent":true,"hardness":0.0},
-        {"id":5,"name":"Sand","texture_id":"","is_solid":true,"is_transparent":false,"hardness":0.5},
-        {"id":6,"name":"Log","texture_id":"","is_solid":true,"is_transparent":false,"hardness":2.0},
-        {"id":7,"name":"Leaf","texture_id":"","is_solid":false,"is_transparent":true,"hardness":0.2},
-    ]))
+async fn get_blocks(State(state): State<Arc<AppState>>) -> Json<Value> {
+    let blocks = state.blocks.lock().unwrap();
+    Json(json!(*blocks))
 }
 
 async fn items() -> Json<Value> {
@@ -82,8 +101,35 @@ async fn rules() -> Json<Value> {
     ]))
 }
 
-async fn create_block(Json(body): Json<Value>) -> Json<Value> {
-    Json(json!({"ok": true, "data": body}))
+async fn create_block(State(state): State<Arc<AppState>>, Json(body): Json<Value>) -> Json<Value> {
+    let mut blocks = state.blocks.lock().unwrap();
+    let mut new_block = body.clone();
+    let next_id = blocks
+        .iter()
+        .filter_map(|b| b.get("id").and_then(|id| id.as_u64()))
+        .max()
+        .unwrap_or(0)
+        + 1;
+    new_block["id"] = json!(next_id);
+    blocks.push(new_block.clone());
+    Json(json!({"ok": true, "data": new_block}))
+}
+
+async fn update_block(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<u64>,
+    Json(body): Json<Value>,
+) -> Json<Value> {
+    let mut blocks = state.blocks.lock().unwrap();
+    if let Some(block) = blocks
+        .iter_mut()
+        .find(|b| b.get("id").and_then(|i| i.as_u64()) == Some(id))
+    {
+        *block = body;
+        Json(json!({"ok": true, "data": block}))
+    } else {
+        Json(json!({"ok": false, "error": "Block not found"}))
+    }
 }
 
 async fn create_item(Json(body): Json<Value>) -> Json<Value> {
@@ -106,13 +152,44 @@ async fn update_rule(Path(id): Path<String>, Json(body): Json<Value>) -> Json<Va
     Json(json!({"ok": true, "id": id, "data": body}))
 }
 
-async fn upload_texture(Json(body): Json<Value>) -> Json<Value> {
-    let name = body.get("name").and_then(|v| v.as_str()).unwrap_or("unknown");
-    Json(json!({"ok": true, "texture_id": name}))
+async fn get_textures(State(state): State<Arc<AppState>>) -> Json<Value> {
+    let textures = state.textures.lock().unwrap();
+    Json(json!(*textures))
 }
 
-fn block_schema() -> Value { json!({"fields":["id","name","texture_id","is_solid","is_transparent","hardness"]}) }
-fn item_schema()  -> Value { json!({"fields":["id","name","description","texture_id","stack_size","item_type"]}) }
-fn recipe_schema()-> Value { json!({"fields":["id","name","inputs","output_item_id","output_quantity"]}) }
-fn npc_schema()   -> Value { json!({"fields":["id","name","traits","x","y","z","routine","memory"]}) }
-fn quest_schema() -> Value { json!({"fields":["id","title","description","giver","objectives","rewards"]}) }
+async fn upload_texture(
+    State(state): State<Arc<AppState>>,
+    Json(body): Json<Value>,
+) -> Json<Value> {
+    let mut textures = state.textures.lock().unwrap();
+    let name = body
+        .get("name")
+        .and_then(|v| v.as_str())
+        .unwrap_or("unknown");
+    let url = body.get("url").and_then(|v| v.as_str()).unwrap_or("");
+
+    let new_texture = json!({
+        "name": name,
+        "url": url,
+        "assignedTo": ""
+    });
+
+    textures.push(new_texture.clone());
+    Json(json!({"ok": true, "texture_id": name, "data": new_texture}))
+}
+
+fn block_schema() -> Value {
+    json!({"fields":["id","name","texture_id","is_solid","is_transparent","hardness"]})
+}
+fn item_schema() -> Value {
+    json!({"fields":["id","name","description","texture_id","stack_size","item_type"]})
+}
+fn recipe_schema() -> Value {
+    json!({"fields":["id","name","inputs","output_item_id","output_quantity"]})
+}
+fn npc_schema() -> Value {
+    json!({"fields":["id","name","traits","x","y","z","routine","memory"]})
+}
+fn quest_schema() -> Value {
+    json!({"fields":["id","title","description","giver","objectives","rewards"]})
+}

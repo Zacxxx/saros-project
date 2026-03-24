@@ -1,32 +1,49 @@
 "use client";
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
+import { get, post } from "@/lib/api";
 
 interface Texture { name: string; url: string; assignedTo: string; }
 
 export default function TexturesPage() {
   const [textures, setTextures] = useState<Texture[]>([]);
+  const [loading, setLoading] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    get<Texture[]>("/api/textures")
+      .then(setTextures)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const uploadFiles = (files: File[]) => {
+    files.forEach(file => {
+      const url = URL.createObjectURL(file);
+      post<{ ok: boolean, data: Texture }>("/api/textures", { name: file.name, url })
+        .then(res => {
+          if (res.ok) {
+            setTextures(t => [...t, res.data]);
+          }
+        })
+        .catch(console.error);
+    });
+  };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
-    files.forEach(file => {
-      const url = URL.createObjectURL(file);
-      setTextures(t => [...t, { name: file.name, url, assignedTo: "" }]);
-    });
+    uploadFiles(files);
   };
 
   const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    files.forEach(file => {
-      const url = URL.createObjectURL(file);
-      setTextures(t => [...t, { name: file.name, url, assignedTo: "" }]);
-    });
+    uploadFiles(files);
   };
 
   const assign = (name: string, target: string) => {
     setTextures(t => t.map(tx => tx.name === name ? { ...tx, assignedTo: target } : tx));
   };
+
+  if (loading) return <p className="text-gray-500">Loading textures...</p>;
 
   return (
     <div>
@@ -55,6 +72,9 @@ export default function TexturesPage() {
             </div>
           </div>
         ))}
+        {textures.length === 0 && (
+          <div className="col-span-4 py-12 text-center text-gray-700">No textures uploaded yet</div>
+        )}
       </div>
     </div>
   );

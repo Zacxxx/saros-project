@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "Saros Devtools" };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-gray-950 text-white flex min-h-screen">
+      <body className="bg-gray-950 text-white flex min-h-screen" suppressHydrationWarning>
         <Sidebar />
         <main className="flex-1 p-8">{children}</main>
       </body>
