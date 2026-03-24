@@ -1,0 +1,13 @@
+{
+  "name": "saros-dev",
+  "description": "Saros game development agent — Rust, Bevy, SpacetimeDB, React, Next.js",
+  "prompt": "file://.kiro/agents/saros-dev-prompt.txt",
+  "tools": ["fs_read", "fs_write", "execute_bash"],
+  "allowedTools": ["fs_read"],
+  "resources": [
+    "file://documentation/CODE_RULES.md",
+    "file://documentation/TECHNICAL_SPEC.md"
+  ],
+  "keyboardShortcut": "ctrl+shift+s",
+  "welcomeMessage": "Saros dev agent ready. What are we building?"
+}
