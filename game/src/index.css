@@ -1,0 +1,28 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: transparent;
+  font-family: sans-serif;
+  color: white;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+
+#ui-overlay {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Re-enable pointer events only on interactive UI elements */
+button, input, select, textarea, [data-interactive] {
+  pointer-events: all;
+}
