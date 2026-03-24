@@ -2,9 +2,9 @@
 
 dev:
 	@echo "Starting devtools..."
-	cd devtools && bun run dev &
+	cd devtools && (bun install && bun run dev) &
 	@echo "Starting game..."
-	cd game && cargo tauri dev
+	cd game && bun tauri dev
 
 build:
 	cd devtools && bun run build
