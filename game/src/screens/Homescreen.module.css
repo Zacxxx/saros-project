@@ -1,0 +1,50 @@
+.root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  pointer-events: all;
+}
+
+.title {
+  font-size: 4rem;
+  letter-spacing: 0.5rem;
+  margin-bottom: 2rem;
+  color: #e8c97a;
+}
+
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.tab, .activeTab {
+  padding: 0.5rem 1.5rem;
+  border: 1px solid #555;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  letter-spacing: 0.1rem;
+  transition: all 0.15s;
+}
+
+.activeTab {
+  border-color: #e8c97a;
+  color: #e8c97a;
+}
+
+.panel {
+  width: 480px;
+  min-height: 300px;
+}
+
+.placeholder {
+  color: #888;
+  text-align: center;
+  margin-top: 2rem;
+}
