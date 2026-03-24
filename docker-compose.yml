@@ -1,6 +1,7 @@
 services:
   spacetimedb:
-    image: clockworklabs/spacetimedb:latest
+    image: clockworklabs/spacetime:v1.6.0
+    command: start
     ports:
       - "3000:3000"
     volumes:
