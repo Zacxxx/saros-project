@@ -1,0 +1,83 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.form label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+.form label input[type="text"],
+.form label input[type="number"] {
+  flex: 1;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  color: white;
+  padding: 0.3rem 0.5rem;
+}
+
+.form label input[type="range"] {
+  flex: 1;
+}
+
+.form label span {
+  width: 3rem;
+  text-align: right;
+  color: #e8c97a;
+  font-size: 0.8rem;
+}
+
+.form fieldset {
+  border: 1px solid #333;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form fieldset legend {
+  color: #888;
+  font-size: 0.8rem;
+  padding: 0 0.5rem;
+}
+
+.primary {
+  margin-top: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  background: #e8c97a;
+  color: #111;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  letter-spacing: 0.1rem;
+  align-self: flex-end;
+}
+
+.worldList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.worldItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.75rem;
+  background: #1a1a1a;
+  border: 1px solid #333;
+}
+
+.worldItem button {
+  padding: 0.3rem 0.75rem;
+  background: transparent;
+  border: 1px solid #e8c97a;
+  color: #e8c97a;
+  cursor: pointer;
+}
