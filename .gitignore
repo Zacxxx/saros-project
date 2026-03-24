@@ -1,0 +1,23 @@
+# Rust
+target/
+
+# Node / Bun
+node_modules/
+.next/
+dist/
+.turbo/
+
+# Tauri
+src-tauri/target/
+src-tauri/WixTools/
+
+# Env
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SpacetimeDB
+*.wasm
