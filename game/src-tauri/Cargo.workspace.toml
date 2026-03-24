@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    ".",
+    "crates/saros-types",
+    "spacetimedb",
+]
+resolver = "2"
