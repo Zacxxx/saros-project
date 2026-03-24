@@ -4,7 +4,7 @@ import type { WorldRecord } from "../types";
 import styles from "./Form.module.css";
 
 interface Props {
-  onLoad: () => void;
+  onLoad: (id: string) => void;
 }
 
 export default function WorldList({ onLoad }: Props) {
@@ -16,7 +16,7 @@ export default function WorldList({ onLoad }: Props) {
 
   const handleLoad = async (id: string) => {
     await invoke("load_world", { id });
-    onLoad();
+    onLoad(id);
   };
 
   if (worlds.length === 0) {

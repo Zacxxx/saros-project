@@ -30,6 +30,8 @@ fn main() {
             saros_game_lib::commands::dialogue::talk_to_npc,
             saros_game_lib::commands::quests::get_quests,
             saros_game_lib::commands::quests::accept_quest,
+            saros_game_lib::commands::generate_world::generate_world,
+            saros_game_lib::commands::generate_world::get_generation_progress,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -37,7 +39,9 @@ fn main() {
 
 fn run_bevy(shared: SharedGameState) {
     use bevy::prelude::*;
-    use saros_game_lib::plugins::{CameraPlugin, CombatPlugin, NpcPlugin, PlayerPlugin, WorldPlugin};
+    use saros_game_lib::plugins::{
+        CameraPlugin, CombatPlugin, MobPlugin, NpcPlugin, PlayerPlugin, WorldPlugin,
+    };
     use saros_game_lib::systems::sync_inventory::{GameStateBridge, sync_inventory_to_shared};
 
     App::new()
@@ -50,7 +54,14 @@ fn run_bevy(shared: SharedGameState) {
             ..default()
         }))
         .insert_resource(GameStateBridge(shared))
-        .add_plugins((CameraPlugin, CombatPlugin, NpcPlugin, PlayerPlugin, WorldPlugin))
+        .add_plugins((
+            CameraPlugin,
+            CombatPlugin,
+            NpcPlugin,
+            PlayerPlugin,
+            WorldPlugin,
+            MobPlugin,
+        ))
         .add_systems(Update, sync_inventory_to_shared)
         .run();
 }

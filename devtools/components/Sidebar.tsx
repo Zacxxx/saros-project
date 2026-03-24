@@ -3,14 +3,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const nav = [
-  { href: "/",        label: "Dashboard" },
-  { href: "/blocks",  label: "Blocks" },
-  { href: "/items",   label: "Items" },
+  { href: "/", label: "Dashboard" },
+  { href: "/blocks", label: "Blocks" },
+  { href: "/items", label: "Items" },
   { href: "/recipes", label: "Recipes" },
-  { href: "/npcs",    label: "NPCs" },
-  { href: "/quests",  label: "Quests" },
-  { href: "/rules",   label: "Game Rules" },
-  { href: "/textures",label: "Textures" },
+  { href: "/npcs", label: "NPCs" },
+  { href: "/mobs", label: "Mobs" },
+  { href: "/quests", label: "Quests" },
+  { href: "/rules", label: "Game Rules" },
+  { href: "/textures", label: "Textures" },
 ];
 
 export default function Sidebar() {

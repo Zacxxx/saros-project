@@ -1,7 +1,7 @@
+use crate::commands::create_world::{WorldParams, WorldRecord};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use crate::commands::create_world::{WorldParams, WorldRecord};
 
 #[derive(Default)]
 struct Inner {
@@ -26,5 +26,9 @@ impl WorldStore {
 
     pub async fn list(&self) -> Vec<WorldRecord> {
         self.0.read().await.records.values().cloned().collect()
+    }
+
+    pub async fn get_params(&self, id: &str) -> Option<WorldParams> {
+        self.0.read().await.params.get(id).cloned()
     }
 }

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import type { WorldParams } from "../types";
+import type { WorldParams, WorldRecord } from "../types";
 import styles from "./Form.module.css";
 
 interface Props {
-  onStart: () => void;
+  onStart: (worldId: string) => void;
 }
 
 const defaults: WorldParams = {
@@ -27,8 +27,8 @@ export default function NewWorldForm({ onStart }: Props) {
     setParams((p) => ({ ...p, biome_weights: { ...p.biome_weights, [key]: value } }));
 
   const handleSubmit = async () => {
-    await invoke("create_world", { params });
-    onStart();
+    const record = await invoke<WorldRecord>("create_world", { params });
+    onStart(record.id);
   };
 
   return (

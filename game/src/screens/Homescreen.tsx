@@ -6,7 +6,7 @@ import styles from "./Homescreen.module.css";
 type Tab = "new" | "load" | "settings";
 
 interface Props {
-  onEnterGame: () => void;
+  onEnterGame: (worldId: string) => void;
 }
 
 export default function Homescreen({ onEnterGame }: Props) {
