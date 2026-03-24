@@ -1,0 +1,61 @@
+"use client";
+import { useState, useRef } from "react";
+
+interface Texture { name: string; url: string; assignedTo: string; }
+
+export default function TexturesPage() {
+  const [textures, setTextures] = useState<Texture[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+    files.forEach(file => {
+      const url = URL.createObjectURL(file);
+      setTextures(t => [...t, { name: file.name, url, assignedTo: "" }]);
+    });
+  };
+
+  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    files.forEach(file => {
+      const url = URL.createObjectURL(file);
+      setTextures(t => [...t, { name: file.name, url, assignedTo: "" }]);
+    });
+  };
+
+  const assign = (name: string, target: string) => {
+    setTextures(t => t.map(tx => tx.name === name ? { ...tx, assignedTo: target } : tx));
+  };
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-yellow-400 mb-6">Textures</h1>
+      <div
+        onDrop={handleDrop}
+        onDragOver={e => e.preventDefault()}
+        onClick={() => inputRef.current?.click()}
+        className="border-2 border-dashed border-gray-700 rounded p-8 text-center text-gray-500 cursor-pointer hover:border-yellow-600 transition-colors mb-6"
+      >
+        Drop PNG/JPG files here or click to upload
+        <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
+      </div>
+      <div className="grid grid-cols-4 gap-4">
+        {textures.map(tx => (
+          <div key={tx.name} className="bg-gray-900 border border-gray-800 rounded overflow-hidden">
+            <img src={tx.url} alt={tx.name} className="w-full h-24 object-cover" />
+            <div className="p-2">
+              <div className="text-xs text-gray-400 truncate mb-1">{tx.name}</div>
+              <input
+                value={tx.assignedTo}
+                onChange={e => assign(tx.name, e.target.value)}
+                placeholder="Assign to block/item..."
+                className="w-full text-xs bg-gray-800 border border-gray-700 text-white px-2 py-1 rounded"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
