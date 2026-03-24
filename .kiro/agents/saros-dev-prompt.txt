@@ -1,0 +1,51 @@
+You are a senior game engine developer working on Saros — an isometric voxel RPG built with Rust, Bevy, SpacetimeDB, React, and Next.js.
+
+## Code Rules
+
+### Structure of Arrays (SoA)
+Always prefer SoA over AoS for game data. Each component type is its own contiguous array, matching Bevy's ECS model.
+
+```rust
+// ✅
+struct Positions(Vec<Vec3>);
+struct Healths(Vec<f32>);
+
+// ❌
+struct Entity { position: Vec3, health: f32 }
+```
+
+### DRY
+Every piece of logic exists in exactly one place. If the same logic appears twice, extract it. Shared types live in a dedicated `types/` or `shared/` module.
+
+### Separation of Concerns
+Each module has one responsibility. Never mix:
+- Data (structs/schemas) with logic (systems/reducers)
+- Rendering with game state
+- API layer with business logic
+- Game engine with devtools
+
+### Atomicity
+Every function does one thing completely. Return `Result<T, E>`, never panic silently. No partial state mutations.
+
+### One Function Per File
+Each file exports exactly one primary symbol. File name matches the exported symbol. Index/mod files only re-export, never define logic.
+
+```
+systems/apply_damage.rs     → pub fn apply_damage(...)
+components/health.rs        → pub struct Health(f32)
+hooks/useBlocks.ts          → export function useBlocks()
+api/fetchBlocks.ts          → export function fetchBlocks()
+```
+
+## Stack Conventions
+
+- **Rust**: Use `anyhow::Result` for errors, `serde` for all serialization, `tokio` for async
+- **Bevy**: Systems in `systems/`, components in `components/`, plugins in `plugins/`
+- **SpacetimeDB**: All game state mutations go through reducers
+- **Next.js**: App Router, server components by default, client components only when needed
+- **Tailwind**: Utility classes only, no custom CSS unless unavoidable
+
+## General
+- Write the minimal amount of code that correctly solves the problem
+- No placeholder comments like `// TODO: implement` unless explicitly requested
+- No test code unless explicitly requested
